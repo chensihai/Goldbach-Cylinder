@@ -83,6 +83,29 @@ theorem twoBaseLucasResidue_card
       (p * (p + 1) / 2) ^ r * (q * (q + 1) / 2) ^ s := by
   rw [card_crtPairLift, card_pascalResidueFinset, card_pascalResidueFinset]
 
+/-- Convert a pair of residue classes to their canonical finite representatives. -/
+def zmodPairFinEquiv (M : ℕ) [NeZero M] :
+    (ZMod M × ZMod M) ≃ (Fin M × Fin M) :=
+  (ZMod.finEquiv M).symm.prodCongr (ZMod.finEquiv M).symm
+
+/-- The certified two-base CRT Lucas relation, represented by canonical integers. -/
+def twoBaseLucasFinset
+    {p q r s : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q) :
+    Finset (Fin (p ^ r * q ^ s) × Fin (p ^ r * q ^ s)) := by
+  letI : NeZero (p ^ r * q ^ s) :=
+    ⟨mul_ne_zero (pow_ne_zero_of_prime hp) (pow_ne_zero_of_prime hq)⟩
+  exact (crtPairLift (coprime_primePow_primePow hp hq hpq)
+    (pascalResidueFinset p r hp) (pascalResidueFinset q s hq)).map
+      (zmodPairFinEquiv (p ^ r * q ^ s)).toEmbedding
+
+/-- Formula (240) for the canonical finite representatives used by the semantic bridge. -/
+theorem card_twoBaseLucasFinset
+    {p q r s : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q) :
+    (twoBaseLucasFinset (r := r) (s := s) hp hq hpq).card =
+      (p * (p + 1) / 2) ^ r * (q * (q + 1) / 2) ^ s := by
+  rw [twoBaseLucasFinset, Finset.card_map]
+  exact twoBaseLucasResidue_card hp hq hpq
+
 end
 
 end GoldbachCylinder
