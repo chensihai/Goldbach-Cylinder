@@ -4,3 +4,4 @@ import GoldbachCylinder.LucasCRT
 import GoldbachCylinder.MacroTriangle
 import GoldbachCylinder.SemanticBridge
 import GoldbachCylinder.TransposeDefect
+import GoldbachCylinder.ExchangeInvariant

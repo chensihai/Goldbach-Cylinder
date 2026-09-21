@@ -194,6 +194,11 @@ private def diagonalResidueEquiv {M : ℕ} (R : Finset (Fin M × Fin M)) :
   left_inv x := by rfl
   right_inv x := by rfl
 
+theorem card_diagonalResidue_eq {M : ℕ} (R : Finset (Fin M × Fin M)) :
+    Fintype.card (DiagonalResidue R) = lowerDiagonalCount R := by
+  rw [Fintype.card_congr (diagonalResidueEquiv R), Fintype.card_coe]
+  rfl
+
 /-- Formula (271), for any finite relation: subtracting the full diagonal
 contribution leaves exactly the signed order defect. -/
 theorem truncatedTriangle_centered_eq {M t : ℕ} (R : Finset (Fin M × Fin M)) :
@@ -201,10 +206,7 @@ theorem truncatedTriangle_centered_eq {M t : ℕ} (R : Finset (Fin M × Fin M)) 
         (t * t * R.card : ℕ) - (t * diagonalCount R : ℕ) =
       (t : ℤ) * orderDefect R := by
   rw [card_truncatedResidueTriangle]
-  have hH : Fintype.card (DiagonalResidue R) = lowerDiagonalCount R := by
-    rw [Fintype.card_congr (diagonalResidueEquiv R), Fintype.card_coe]
-    rfl
-  rw [hH]
+  rw [card_diagonalResidue_eq]
   have hdef := two_mul_lowerDiagonalCount_eq R
   have hchooseNat : 2 * Nat.choose t 2 = t * (t - 1) := by
     rw [Nat.choose_two_right, Nat.mul_comm 2]
