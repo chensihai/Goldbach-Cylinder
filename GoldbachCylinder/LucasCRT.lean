@@ -60,7 +60,7 @@ private def pascalResidueFinEmbedding (p d : ℕ) :
 /-- Embed the actual `(n,k)` pair into its two residue classes modulo `p^d`. -/
 def pascalResidueEmbedding (p d : ℕ) (hp : p.Prime) :
     PascalResidue p d ↪ (ZMod (p ^ d) × ZMod (p ^ d)) := by
-  letI : NeZero (p ^ d) := ⟨pow_ne_zero_of_prime hp⟩
+  let _ : NeZero (p ^ d) := ⟨pow_ne_zero_of_prime hp⟩
   exact (pascalResidueFinEmbedding p d).trans
     ((ZMod.finEquiv (p ^ d)).toEquiv.prodCongr
       (ZMod.finEquiv (p ^ d)).toEquiv).toEmbedding
@@ -74,6 +74,21 @@ theorem card_pascalResidueFinset (p d : ℕ) (hp : p.Prime) :
     (pascalResidueFinset p d hp).card = (p * (p + 1) / 2) ^ d := by
   rw [pascalResidueFinset, Finset.card_map, Finset.card_univ]
   exact card_pascalResidue p d hp
+
+theorem diagonal_mem_pascalResidueFinset (p d : ℕ) (hp : p.Prime)
+    (a : ZMod (p ^ d)) : (a, a) ∈ pascalResidueFinset p d hp := by
+  classical
+  letI : NeZero (p ^ d) := ⟨pow_ne_zero_of_prime hp⟩
+  let n : Fin (p ^ d) := (ZMod.finEquiv (p ^ d)).symm a
+  let k : RowResidue p n.1 := ⟨n.1, by
+    simp [hp.not_dvd_one]⟩
+  rw [pascalResidueFinset, Finset.mem_map]
+  refine ⟨⟨n, k⟩, Finset.mem_univ _, ?_⟩
+  apply Prod.ext
+  · change (ZMod.finEquiv (p ^ d)) n = a
+    simp [n]
+  · change (ZMod.finEquiv (p ^ d)) n = a
+    simp [n]
 
 /-- Formula (240): exact two-base Lucas factorization on a complete CRT residue box. -/
 theorem twoBaseLucasResidue_card
@@ -92,7 +107,7 @@ def zmodPairFinEquiv (M : ℕ) [NeZero M] :
 def twoBaseLucasFinset
     {p q r s : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q) :
     Finset (Fin (p ^ r * q ^ s) × Fin (p ^ r * q ^ s)) := by
-  letI : NeZero (p ^ r * q ^ s) :=
+  let _ : NeZero (p ^ r * q ^ s) :=
     ⟨mul_ne_zero (pow_ne_zero_of_prime hp) (pow_ne_zero_of_prime hq)⟩
   exact (crtPairLift (coprime_primePow_primePow hp hq hpq)
     (pascalResidueFinset p r hp) (pascalResidueFinset q s hq)).map
@@ -105,6 +120,28 @@ theorem card_twoBaseLucasFinset
       (p * (p + 1) / 2) ^ r * (q * (q + 1) / 2) ^ s := by
   rw [twoBaseLucasFinset, Finset.card_map]
   exact twoBaseLucasResidue_card hp hq hpq
+
+theorem diagonal_mem_twoBaseLucasFinset
+    {p q r s : ℕ} (hp : p.Prime) (hq : q.Prime) (hpq : p ≠ q)
+    (a : Fin (p ^ r * q ^ s)) :
+    (a, a) ∈ twoBaseLucasFinset (r := r) (s := s) hp hq hpq := by
+  classical
+  letI : NeZero (p ^ r * q ^ s) :=
+    ⟨mul_ne_zero (pow_ne_zero_of_prime hp) (pow_ne_zero_of_prime hq)⟩
+  let z : ZMod (p ^ r * q ^ s) := (ZMod.finEquiv _ a)
+  let e := (ZMod.chineseRemainder
+    (coprime_primePow_primePow (r := r) (s := s) hp hq hpq)).toEquiv
+  have hpdiag : ((e z).1, (e z).1) ∈ pascalResidueFinset p r hp :=
+    diagonal_mem_pascalResidueFinset p r hp (e z).1
+  have hqdiag : ((e z).2, (e z).2) ∈ pascalResidueFinset q s hq :=
+    diagonal_mem_pascalResidueFinset q s hq (e z).2
+  rw [twoBaseLucasFinset, Finset.mem_map]
+  refine ⟨(z, z), ?_, ?_⟩
+  · rw [crtPairLift, Finset.mem_map]
+    refine ⟨(((e z).1, (e z).1), ((e z).2, (e z).2)), ?_, ?_⟩
+    · simp [hpdiag, hqdiag]
+    · apply Prod.ext <;> simp [crtPairEquiv, e]
+  · apply Prod.ext <;> simp [z, zmodPairFinEquiv]
 
 end
 
