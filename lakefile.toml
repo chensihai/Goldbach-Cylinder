@@ -1,0 +1,14 @@
+name = "GoldbachCylinder"
+version = "0.1.0"
+defaultTargets = ["GoldbachCylinder"]
+
+[[require]]
+name = "mathlib"
+path = "../mathlib4"
+
+[[require]]
+name = "Cylinder_RH"
+path = "../Cylinder_RH"
+
+[[lean_lib]]
+name = "GoldbachCylinder"
